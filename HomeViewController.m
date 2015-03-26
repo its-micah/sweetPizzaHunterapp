@@ -105,6 +105,7 @@
     mapVC.foundPizzerias = self.pizzeriaArray;
     mapVC.directions = self.directionString;
     mapVC.title = @"Pizzerias";
+    mapVC.mapPizzeria = self.pizzeria;
 }
 
 #pragma mark "tableView delegate methods"

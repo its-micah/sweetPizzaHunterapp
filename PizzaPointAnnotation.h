@@ -13,4 +13,5 @@
 @property NSString *name;
 @property double latitude;
 @property double longitude;
+@property MKAnnotationView *view;
 @end

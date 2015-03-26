@@ -8,12 +8,15 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import "Pizzeria.h"
 
 @interface MapViewController : UIViewController
 
 @property CLLocation *currentLocation;
 @property NSMutableArray *foundPizzerias;
 @property NSMutableString *directions;
+@property Pizzeria *mapPizzeria;
+
 
 
 

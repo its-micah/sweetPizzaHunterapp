@@ -10,9 +10,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
 
-@interface DirectionsViewController () <MKMapViewDelegate>
+@interface DirectionsViewController () <MKMapViewDelegate, CLLocationManagerDelegate>
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UITextView *textView;
+@property NSMutableString *directionString;
 
 @end
 
@@ -23,24 +24,74 @@
     self.mapView.delegate = self;
     [self goToLocation];
     self.mapView.showsUserLocation = YES;
+    self.mapView.userTrackingMode = YES;
+    [self.mapView addAnnotation:self.selectedPizzaPointAnnotation];
+
+
+    CLLocationCoordinate2D coordinates[2] =
+    {self.currentLocation.coordinate, self.selectedPizzaPointAnnotation.coordinate};
+
+    MKGeodesicPolyline *geodesicPolyline =
+    [MKGeodesicPolyline polylineWithCoordinates:coordinates
+                                          count:2];
+
+    [self.mapView addOverlay:geodesicPolyline];
+    self.textView.text = self.directionString;
     
 }
 
 
+- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
 
-- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay {
-    if ([overlay isKindOfClass:[MKPolygon class]])
-    {
-        MKPolygonRenderer *aView = [[MKPolygonRenderer alloc] initWithOverlay:MKOverlayLevelAboveRoads];
+    if (![annotation isEqual:mapView.userLocation]) {
+        MKPinAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
+        pin.image = [UIImage imageNamed:@"pizza"];
+        pin.canShowCallout = YES;
+        pin.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
 
-        aView.fillColor = [[UIColor cyanColor] colorWithAlphaComponent:0.2];
-        aView.strokeColor = [[UIColor blueColor] colorWithAlphaComponent:0.7];
-        aView.lineWidth = 3;
-
-        return aView;
+        return pin;
+    } else {
+        return nil;
     }
-    return nil;
 }
+
+//- (void)getDirectionsTo:(MKMapItem *)destinationItem {
+//    MKDirectionsRequest *request = [MKDirectionsRequest new];
+//    request.source = [MKMapItem mapItemForCurrentLocation];
+//    request.destination = [[MKMapItem alloc] initWithPlacemark:self.selectedPizzeria.placemark];
+//    request.transportType = MKDirectionsTransportTypeWalking;
+//    MKDirections *directions = [[MKDirections alloc] initWithRequest:request];
+//
+//    [directions calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
+//        MKRoute *route = response.routes.firstObject;
+//        self.directionString = [NSMutableString new];
+//        int counter = 1;
+//
+//        for (MKRouteStep *step in route.steps) {
+//            [self.directionString appendFormat:@"%d: %@\n", counter, step.instructions];
+//            counter++;
+//        }
+//    }];
+//}
+
+
+
+
+- (MKOverlayRenderer *)mapView:(MKMapView *)mapView rendererForOverlay:(id <MKOverlay>)overlay
+{
+    if (![overlay isKindOfClass:[MKPolyline class]]) {
+        return nil;
+    }
+
+    MKPolylineRenderer *renderer = [[MKPolylineRenderer alloc] initWithPolyline:(MKPolyline *)overlay];
+    renderer.lineWidth = 3.0f;
+    renderer.strokeColor = [UIColor blueColor];
+    renderer.alpha = 0.5;
+
+    return renderer;
+}
+
+
 
 - (void)goToLocation {
 

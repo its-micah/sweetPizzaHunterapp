@@ -11,5 +11,6 @@
 @interface Pizzeria : MKMapItem
 
 @property NSString *pizzeriaName;
+//@property MKAnnotationView *pizzeriaAnnotationView;
 
 @end
